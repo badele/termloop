@@ -12,6 +12,8 @@ type Game struct {
 	input  *input
 	debug  bool
 	logs   []string
+	initialTermSizeX int
+	initialTermSizeY int
 }
 
 // NewGame creates a new Game, along with a Screen and input handler.
@@ -22,7 +24,22 @@ func NewGame() *Game {
 		input:  newInput(),
 		logs:   make([]string, 0),
 	}
+
+	err := termbox.Init()
+	termbox.SetOutputMode(termbox.Output256)
+	termbox.SetInputMode(termbox.InputAlt | termbox.InputMouse)
+	if err != nil {
+		panic(err)
+	}
+	defer g.dumpLogs()
+	defer termbox.Close()
+	g.initialTermSizeX, g.initialTermSizeY = termbox.Size()
+
 	return &g
+}
+
+func (g *Game) InitialTermSize() (int, int) {
+	return g.initialTermSizeX,g.initialTermSizeY
 }
 
 // Screen returns the current Screen of a Game.
